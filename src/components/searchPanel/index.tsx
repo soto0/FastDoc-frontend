@@ -58,7 +58,11 @@ const SearchPanel = () => {
   return (
     <>
       <section className="search-section">
-        <form className="search-form" role="search" onSubmit={handleSubmit}>
+        <form
+          className="search-form animate-slide-down"
+          role="search"
+          onSubmit={handleSubmit}
+        >
           <FieldGroup className="flex flex-row items-end">
             <Field onClick={() => setOpen(true)}>
               <FieldLabel>Название пакета</FieldLabel>
@@ -88,7 +92,7 @@ const SearchPanel = () => {
             </Field>
           </FieldGroup>
         </form>
-        <Card className="result-card">
+        <Card className="result-card animate-slide-up">
           <CardContent className="result-content">
             {isLoading ? (
               <Spinner className="size-5 absolute left-0 right-0 mx-auto" />
