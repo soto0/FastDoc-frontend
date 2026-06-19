@@ -16,10 +16,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 interface TagSelectorParams {
   repo?: string;
   owner?: string;
+  tag?: string;
   setTag: (tag: string | undefined) => void;
 }
 
-const TagSelector = ({ repo, owner, setTag }: TagSelectorParams) => {
+const TagSelector = ({ repo, owner, setTag, tag }: TagSelectorParams) => {
   const [open, setOpen] = useState(false);
   const {
     selected,
@@ -28,7 +29,7 @@ const TagSelector = ({ repo, owner, setTag }: TagSelectorParams) => {
     listRef,
     handleScroll,
     selectRelease,
-  } = useReleases({ repo, owner, open, setOpen, setTag });
+  } = useReleases({ repo, owner, open, setOpen, setTag, tag });
 
   return (
     <Field className="w-[300px]">
