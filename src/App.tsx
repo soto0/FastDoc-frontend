@@ -1,7 +1,15 @@
+import MainPage from "@/pages/Main";
+import Header from "./components/layout/header";
+
 const App = () => {
   return (
-    <div>
-      <h1>Hello World</h1>
+    <div className="app-shell">
+      <div className="app-container">
+        <Header />
+        <main className="app-main">
+          <MainPage />
+        </main>
+      </div>
     </div>
   );
 };
