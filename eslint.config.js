@@ -6,7 +6,7 @@ const compat = new FlatCompat({});
 
 const antfuConfigs = await antfu(
   { typescript: { tsconfigPath: "./tsconfig.json" }, stylistic: false },
-  { ignores: ["**/*.md"] },
+  { ignores: ["**/*.md", "src/components/ui/**"] },
   {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
