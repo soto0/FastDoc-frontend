@@ -4,7 +4,6 @@ import { getRepos } from "@/api/getRepos";
 import {
   Command,
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -32,7 +31,9 @@ const RepoSearch = ({ open, setOpen, setRepo }: RepoSearchParams) => {
       setRepos(response);
     }, 400);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [query]);
 
   const onSelect = (repo: IRepo) => {
@@ -56,7 +57,6 @@ const RepoSearch = ({ open, setOpen, setRepo }: RepoSearchParams) => {
             onValueChange={setQuery}
           />
           <CommandList>
-            <CommandEmpty>Ничего не найдено</CommandEmpty>
             <CommandGroup>
               {repos.map((item) => (
                 <CommandItem

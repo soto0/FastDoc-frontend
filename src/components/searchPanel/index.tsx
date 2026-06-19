@@ -1,10 +1,11 @@
 import type { FormEvent } from "react";
 import type { IRepo } from "@/types/IRepos";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { getChangelog } from "@/api/getChangelog";
 import { Card, CardContent } from "@/components/ui/card";
+import { useSearchParams } from "@/hooks/useSearchParams";
 import { Button } from "../ui/button";
 import Empty from "../ui/empty";
 import { Field, FieldGroup, FieldLabel } from "../ui/field";
@@ -14,23 +15,44 @@ import RepoSearch from "./repoSearch";
 import TagSelector from "./tagSelector";
 
 const SearchPanel = () => {
+  const { params, updateParams } = useSearchParams();
   const [open, setOpen] = useState(false);
   const [repo, setRepo] = useState<IRepo>();
   const [tag, setTag] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
   const [changelog, setChangelog] = useState<string>();
 
+  useEffect(() => {
+    const { repo: repoParam, owner: ownerParam, tag: tagParam } = params;
+
+    if (repoParam && ownerParam) {
+      setRepo({ repo: repoParam, owner: ownerParam } as IRepo);
+    } else {
+      setRepo(undefined);
+    }
+
+    if (tagParam) {
+      setTag(tagParam);
+    } else {
+      setTag(undefined);
+      setChangelog(undefined);
+    }
+
+    if (repoParam && ownerParam && tagParam) {
+      setIsLoading(true);
+      getChangelog({ repo: repoParam, owner: ownerParam, tag: tagParam })
+        .then((response) => setChangelog(response.changelog))
+        .catch(() => console.error("error"))
+        .finally(() => setIsLoading(false));
+    }
+  }, [params]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (repo == null || tag == null) return;
 
-    setIsLoading(true);
-
-    getChangelog({ repo: repo.repo, owner: repo.owner, tag })
-      .then((response) => setChangelog(response.changelog))
-      .catch(() => console.error("da"))
-      .finally(() => setIsLoading(false));
+    updateParams({ repo: repo.repo, owner: repo.owner, tag });
   };
 
   return (
@@ -50,6 +72,7 @@ const SearchPanel = () => {
             <TagSelector
               repo={repo?.repo}
               owner={repo?.owner}
+              tag={tag}
               setTag={setTag}
             />
             <Field className="w-fit">
