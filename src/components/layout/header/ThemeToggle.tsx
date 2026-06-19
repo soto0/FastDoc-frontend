@@ -1,6 +1,6 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { DARK, LIGHT, STORAGE_KEY } from "@/constants/theme";
 
 type Theme = typeof DARK | typeof LIGHT;
