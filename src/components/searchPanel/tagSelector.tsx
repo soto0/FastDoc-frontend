@@ -14,8 +14,8 @@ import { Field, FieldLabel } from "../ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface TagSelectorParams {
-  repo: string;
-  owner: string;
+  repo?: string;
+  owner?: string;
   setTag: (tag: string | undefined) => void;
 }
 

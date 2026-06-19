@@ -16,8 +16,8 @@ interface ReleasesState {
 }
 
 interface UseReleasesParams {
-  repo: string;
-  owner: string;
+  repo?: string;
+  owner?: string;
   open: boolean; // Flag indicating whether the dropdown/modal is open
   setOpen: (open: boolean) => void;
   setTag: (tag: string | undefined) => void;
