@@ -4,12 +4,12 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { getChangelog } from "@/api/getChangelog";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Button } from "../ui/Button";
-import Empty from "../ui/Empty";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "../ui/button";
+import Empty from "../ui/empty";
 import { Field, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/Input";
-import { Spinner } from "../ui/Spinner";
+import { Input } from "../ui/input";
+import { Spinner } from "../ui/spinner";
 import RepoSearch from "./repoSearch";
 import TagSelector from "./tagSelector";
 

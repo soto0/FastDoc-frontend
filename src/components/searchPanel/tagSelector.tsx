@@ -2,7 +2,7 @@ import { ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useReleases } from "@/hooks/useReleasesSelector";
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/button";
 import {
   Command,
   CommandEmpty,
