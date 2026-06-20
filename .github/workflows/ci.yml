@@ -1,0 +1,134 @@
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+    pull_request:
+        branches:
+            - main
+            - develop
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build-and-test:
+        name: Build & Test
+        runs-on: ubuntu-latest
+        if: |
+            github.event_name == 'pull_request' || 
+            github.ref == 'refs/heads/main'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js 22
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci --prefer-offline --ignore-scripts
+
+            - name: Run Format Check
+              run: npm run format:check
+              env:
+                  NODE_ENV: development
+
+            - name: Run Lint
+              run: npm run lint
+              env:
+                  NODE_ENV: development
+
+            - name: Run Type Check
+              run: npm run type-check
+              env:
+                  NODE_ENV: development
+
+            - name: Run Tests
+              run: npm run test
+              env:
+                  NODE_ENV: test
+
+            - name: Build Project
+              run: npm run build
+              env:
+                  NODE_ENV: production
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: dist-files
+                  path: dist/
+                  retention-days: 1
+
+    deploy_preview:
+        name: Deploy Preview (Vercel)
+        needs: build-and-test
+        runs-on: ubuntu-latest
+        if: github.ref != 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'pull_request')
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js 22
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci --prefer-offline --ignore-scripts
+
+            - name: Build for Vercel
+              run: npm run build
+              env:
+                  NODE_ENV: production
+
+            - name: Deploy to Vercel (Preview)
+              uses: amondnet/vercel-action@v25
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+                  vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  vercel-args: '--environment=preview'
+
+    deploy_production:
+        name: Deploy Production (Vercel)
+        needs: build-and-test
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        environment: production
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js 22
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: 'npm'
+
+            - name: Install dependencies
+              run: npm ci --prefer-offline --ignore-scripts
+
+            - name: Build for Production
+              run: npm run build
+              env:
+                  NODE_ENV: production
+
+            - name: Deploy to Vercel (Production)
+              uses: amondnet/vercel-action@v25
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+                  vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+                  vercel-args: '--prod'
