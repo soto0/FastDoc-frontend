@@ -1,9 +1,9 @@
-import type { IRoot } from "./IRoot";
+import type { IRoot } from './IRoot';
 
 export interface IRepo {
-  id: number;
-  repo: string;
-  owner: string;
+    id: number;
+    repo: string;
+    owner: string;
 }
 
 export type ReposResponse = IRoot<IRepo[]>;

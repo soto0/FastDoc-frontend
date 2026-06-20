@@ -1,14 +1,14 @@
-import type { IRoot } from "./IRoot";
+import type { IRoot } from './IRoot';
 
 export interface IReleases {
-  id: number;
-  name: string;
-  tag: string;
+    id: number;
+    name: string;
+    tag: string;
 }
 
 export interface IReleasesPage {
-  releases: IReleases[];
-  hasMore: boolean;
+    releases: IReleases[];
+    hasMore: boolean;
 }
 
 export type ReleasesResponse = IRoot<IReleases[]>;
