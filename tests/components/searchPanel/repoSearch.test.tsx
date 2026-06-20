@@ -1,71 +1,71 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { mockRepo } from "@tests/helpers/testHelper";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import RepoSearch from "@/components/searchPanel/repoSearch";
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { mockRepo } from '@tests/helpers/testHelper';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import RepoSearch from '@/components/searchPanel/repoSearch';
 
 const { getReposMock } = vi.hoisted(() => ({
-  getReposMock: vi.fn(),
+    getReposMock: vi.fn()
 }));
 
-vi.mock("@/api/getRepos", () => ({
-  getRepos: getReposMock,
+vi.mock('@/api/getRepos', () => ({
+    getRepos: getReposMock
 }));
 
-describe("repoSearch", () => {
-  beforeEach(() => {
-    getReposMock.mockReset();
-  });
-
-  it("does not search when query is shorter than 3 characters", async () => {
-    render(<RepoSearch open setOpen={vi.fn()} setRepo={vi.fn()} />);
-
-    fireEvent.change(screen.getByPlaceholderText("Введите название пакета"), {
-      target: { value: "ab" },
+describe('repoSearch', () => {
+    beforeEach(() => {
+        getReposMock.mockReset();
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    it('does not search when query is shorter than 3 characters', async () => {
+        render(<RepoSearch open setOpen={vi.fn()} setRepo={vi.fn()} />);
 
-    expect(getReposMock).not.toHaveBeenCalled();
-  });
+        fireEvent.change(screen.getByPlaceholderText('Введите название пакета'), {
+            target: { value: 'ab' }
+        });
 
-  it("debounces repository search", async () => {
-    getReposMock.mockResolvedValue([mockRepo()]);
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-    render(<RepoSearch open setOpen={vi.fn()} setRepo={vi.fn()} />);
-
-    fireEvent.change(screen.getByPlaceholderText("Введите название пакета"), {
-      target: { value: "next" },
+        expect(getReposMock).not.toHaveBeenCalled();
     });
 
-    expect(getReposMock).not.toHaveBeenCalled();
+    it('debounces repository search', async () => {
+        getReposMock.mockResolvedValue([mockRepo()]);
 
-    await waitFor(
-      () => {
-        expect(getReposMock).toHaveBeenCalledWith("next");
-      },
-      { timeout: 1000 },
-    );
-  });
+        render(<RepoSearch open setOpen={vi.fn()} setRepo={vi.fn()} />);
 
-  it("selects a repository and closes the dialog", async () => {
-    const repo = mockRepo({ id: 5, repo: "vue", owner: "vuejs" });
-    getReposMock.mockResolvedValue([repo]);
-    const setOpen = vi.fn();
-    const setRepo = vi.fn();
+        fireEvent.change(screen.getByPlaceholderText('Введите название пакета'), {
+            target: { value: 'next' }
+        });
 
-    render(<RepoSearch open setOpen={setOpen} setRepo={setRepo} />);
+        expect(getReposMock).not.toHaveBeenCalled();
 
-    fireEvent.change(screen.getByPlaceholderText("Введите название пакета"), {
-      target: { value: "vue" },
+        await waitFor(
+            () => {
+                expect(getReposMock).toHaveBeenCalledWith('next');
+            },
+            { timeout: 1000 }
+        );
     });
 
-    await waitFor(() => {
-      expect(screen.getByText("vue")).toBeInTheDocument();
+    it('selects a repository and closes the dialog', async () => {
+        const repo = mockRepo({ id: 5, repo: 'vue', owner: 'vuejs' });
+        getReposMock.mockResolvedValue([repo]);
+        const setOpen = vi.fn();
+        const setRepo = vi.fn();
+
+        render(<RepoSearch open setOpen={setOpen} setRepo={setRepo} />);
+
+        fireEvent.change(screen.getByPlaceholderText('Введите название пакета'), {
+            target: { value: 'vue' }
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText('vue')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByText('vue'));
+
+        expect(setRepo).toHaveBeenCalledWith(repo);
+        expect(setOpen).toHaveBeenCalledWith(false);
     });
-
-    fireEvent.click(screen.getByText("vue"));
-
-    expect(setRepo).toHaveBeenCalledWith(repo);
-    expect(setOpen).toHaveBeenCalledWith(false);
-  });
 });

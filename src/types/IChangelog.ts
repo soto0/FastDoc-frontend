@@ -1,7 +1,7 @@
-import type { IRoot } from "./IRoot";
+import type { IRoot } from './IRoot';
 
 export interface IChangelog {
-  changelog: string;
+    changelog: string;
 }
 
 export type ChangelogResponse = IRoot<IChangelog>;

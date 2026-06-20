@@ -1,5 +1,5 @@
 // hooks/useSearchParams.ts
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Simple hook for managing all URL search parameters as a key-value object.
@@ -18,71 +18,69 @@ import { useCallback, useEffect, useState } from "react";
  */
 
 export const useSearchParams = () => {
-  // Initialize state with all current URL parameters
-  const [params, setParams] = useState<Record<string, string>>(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const result: Record<string, string> = {};
+    // Initialize state with all current URL parameters
+    const [params, setParams] = useState<Record<string, string>>(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const result: Record<string, string> = {};
 
-    // Convert URLSearchParams to plain object
-    urlParams.forEach((value, key) => {
-      result[key] = value;
+        // Convert URLSearchParams to plain object
+        urlParams.forEach((value, key) => {
+            result[key] = value;
+        });
+
+        return result;
     });
 
-    return result;
-  });
+    /**
+     * Merge new parameters with existing ones and update URL.
+     * Empty/falsy values are automatically removed from URL.
+     */
+    const updateParams = useCallback((newParams: Record<string, string>) => {
+        setParams((current) => {
+            const updated = { ...current, ...newParams };
 
-  /**
-   * Merge new parameters with existing ones and update URL.
-   * Empty/falsy values are automatically removed from URL.
-   */
-  const updateParams = useCallback((newParams: Record<string, string>) => {
-    setParams((current) => {
-      const updated = { ...current, ...newParams };
+            const urlParams = new URLSearchParams();
+            // Only include truthy values in URL
+            Object.entries(updated).forEach(([key, value]) => {
+                if (value) urlParams.set(key, value);
+            });
 
-      const urlParams = new URLSearchParams();
-      // Only include truthy values in URL
-      Object.entries(updated).forEach(([key, value]) => {
-        if (value) urlParams.set(key, value);
-      });
+            const newUrl = urlParams.toString() ? `?${urlParams.toString()}` : window.location.pathname;
 
-      const newUrl = urlParams.toString()
-        ? `?${urlParams.toString()}`
-        : window.location.pathname;
+            window.history.pushState({}, '', newUrl);
 
-      window.history.pushState({}, "", newUrl);
+            return updated;
+        });
+    }, []);
 
-      return updated;
-    });
-  }, []);
+    /**
+     * Clear all parameters from state and URL.
+     * Resets URL to just the pathname.
+     */
+    const clearParams = useCallback(() => {
+        setParams({});
+        window.history.pushState({}, '', window.location.pathname);
+    }, []);
 
-  /**
-   * Clear all parameters from state and URL.
-   * Resets URL to just the pathname.
-   */
-  const clearParams = useCallback(() => {
-    setParams({});
-    window.history.pushState({}, "", window.location.pathname);
-  }, []);
+    /**
+     * Handle browser back/forward navigation.
+     * Re-reads all parameters from the current URL.
+     */
+    useEffect(() => {
+        const handlePopState = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const result: Record<string, string> = {};
 
-  /**
-   * Handle browser back/forward navigation.
-   * Re-reads all parameters from the current URL.
-   */
-  useEffect(() => {
-    const handlePopState = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const result: Record<string, string> = {};
+            urlParams.forEach((value, key) => {
+                result[key] = value;
+            });
 
-      urlParams.forEach((value, key) => {
-        result[key] = value;
-      });
+            setParams(result);
+        };
 
-      setParams(result);
-    };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
 
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  return { params, updateParams, clearParams };
+    return { params, updateParams, clearParams };
 };

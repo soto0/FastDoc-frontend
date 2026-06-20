@@ -1,37 +1,37 @@
-import { mockRelease } from "@tests/helpers/testHelper";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mockRelease } from '@tests/helpers/testHelper';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getReleases } from "@/api/getReleases";
+import { getReleases } from '@/api/getReleases';
 
 const { getMock } = vi.hoisted(() => ({
-  getMock: vi.fn(),
+    getMock: vi.fn()
 }));
 
-vi.mock("@/utils/apiClient", () => ({
-  apiClient: {
-    get: getMock,
-  },
+vi.mock('@/utils/apiClient', () => ({
+    apiClient: {
+        get: getMock
+    }
 }));
 
-describe("getReleases", () => {
-  beforeEach(() => {
-    getMock.mockReset();
-  });
-
-  it("returns releases and hasMore from the API response", async () => {
-    const releases = [mockRelease()];
-    getMock.mockResolvedValueOnce({
-      data: {
-        payload: releases,
-        meta: { success: true, hasMore: true },
-      },
+describe('getReleases', () => {
+    beforeEach(() => {
+        getMock.mockReset();
     });
 
-    const result = await getReleases({ repo: "next.js", owner: "vercel", page: 1 });
+    it('returns releases and hasMore from the API response', async () => {
+        const releases = [mockRelease()];
+        getMock.mockResolvedValueOnce({
+            data: {
+                payload: releases,
+                meta: { success: true, hasMore: true }
+            }
+        });
 
-    expect(result).toEqual({ releases, hasMore: true });
-    expect(getMock).toHaveBeenCalledWith("/repos/releases", {
-      params: { repo: "next.js", owner: "vercel", page: 1 },
+        const result = await getReleases({ repo: 'next.js', owner: 'vercel', page: 1 });
+
+        expect(result).toEqual({ releases, hasMore: true });
+        expect(getMock).toHaveBeenCalledWith('/repos/releases', {
+            params: { repo: 'next.js', owner: 'vercel', page: 1 }
+        });
     });
-  });
 });
