@@ -1,81 +1,81 @@
 image: node:22-alpine
 
 stages:
-  - install
-  - format
-  - test
-  - build
-  - deploy
+    - install
+    - format
+    - test
+    - build
+    - deploy
 
 cache:
-  key:
-    files:
-      - package-lock.json
-  paths:
-    - node_modules/
-    - .vite/
-    - .npm/
+    key:
+        files:
+            - package-lock.json
+    paths:
+        - node_modules/
+        - .vite/
+        - .npm/
 
 workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
-    - when: never
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+        - if: $CI_COMMIT_BRANCH == "main"
+        - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+        - when: never
 
 install:
-  stage: install
-  script:
-    - echo "[INSTALL]"
-    - npm ci --prefer-offline --ignore-scripts
+    stage: install
+    script:
+        - echo "[INSTALL]"
+        - npm ci --prefer-offline --ignore-scripts
 
 format:
-  stage: format
-  variables:
-    NODE_ENV: development
-  script:
-    - echo "[FORMAT]"
-    - npm run format
-    - npm run lint
-    - npm run type-check
+    stage: format
+    variables:
+        NODE_ENV: development
+    script:
+        - echo "[FORMAT]"
+        - npm run format:check
+        - npm run lint
+        - npm run type-check
 
 test:
-  stage: test
-  variables:
-    NODE_ENV: test
-  script:
-    - echo "[TEST]"
-    - npm run test
+    stage: test
+    variables:
+        NODE_ENV: test
+    script:
+        - echo "[TEST]"
+        - npm run test
 
 build:
-  stage: build
-  variables:
-    NODE_ENV: production
-  script:
-    - echo "[BUILD]"
-    - npm run build
-  artifacts:
-    paths:
-      - dist/
-    expire_in: 1 hour
+    stage: build
+    variables:
+        NODE_ENV: production
+    script:
+        - echo "[BUILD]"
+        - npm run build
+    artifacts:
+        paths:
+            - dist/
+        expire_in: 1 hour
 
 deploy_preview:
-  stage: deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH != "main"
-  script:
-    - echo "[DEPLOY PREVIEW]"
-    - npm install --global vercel
-    - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
-    - vercel build --token=$VERCEL_TOKEN
-    - vercel deploy --prebuilt  --token=$VERCEL_TOKEN
+    stage: deploy
+    rules:
+        - if: $CI_COMMIT_BRANCH != "main"
+    script:
+        - echo "[DEPLOY PREVIEW]"
+        - npm install --global vercel
+        - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+        - vercel build --token=$VERCEL_TOKEN
+        - vercel deploy --prebuilt  --token=$VERCEL_TOKEN
 
 deploy_production:
-  stage: deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-  script:
-    - npm install --global vercel
-    - vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-    - vercel build --prod --token=$VERCEL_TOKEN
-    - vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+    stage: deploy
+    rules:
+        - if: $CI_COMMIT_BRANCH == "main"
+    script:
+        - npm install --global vercel
+        - vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+        - vercel build --prod --token=$VERCEL_TOKEN
+        - vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
