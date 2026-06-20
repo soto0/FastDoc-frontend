@@ -8,6 +8,14 @@ const antfuConfigs = await antfu(
   { typescript: { tsconfigPath: "./tsconfig.json" }, stylistic: false },
   { ignores: ["**/*.md", "src/components/ui/**"] },
   {
+    files: ["**/*.test.ts", "**/*.test.tsx"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+    },
+  },
+  {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
       ecmaVersion: "latest",
