@@ -40,6 +40,7 @@ const SearchPanel = () => {
 
     if (repoParam && ownerParam && tagParam) {
       setIsLoading(true);
+
       getChangelog({ repo: repoParam, owner: ownerParam, tag: tagParam })
         .then((response) => setChangelog(response.changelog))
         .catch(() => console.error("error"))
@@ -69,7 +70,7 @@ const SearchPanel = () => {
               <Input
                 placeholder="next.js, vue 3.5..."
                 readOnly
-                value={repo?.repo}
+                value={repo?.repo ?? ""}
                 className="py-5"
               />
             </Field>
@@ -106,7 +107,7 @@ const SearchPanel = () => {
                 prose-code:text-emerald-300 prose-code:bg-foreground/10 
                 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
                 prose-pre:bg-foreground/5 prose-pre:rounded-lg
-                prose-ul:my-3 prose-li:space-y-1.5"
+                prose-ul:my-3 prose-li:space-y-1.5 prose-li:text-gray-400"
               >
                 <ReactMarkdown>{changelog}</ReactMarkdown>
               </div>

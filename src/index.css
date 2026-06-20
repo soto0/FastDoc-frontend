@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&display=swap");
-
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -386,7 +384,7 @@
 }
 
 .animate-slide-down {
-  animation: slideDown 0.5s ease-out;
+  animation: slideDown 0.5s ease-out 0.2s both;
 }
 
 .animate-slide-up {
