@@ -1,6 +1,6 @@
 import type { UIEvent } from "react";
 import type { IReleases } from "@/types/IReleases";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getReleases } from "@/api/getReleases";
 
 const BOTTOM_OFFSET = 40;
@@ -30,8 +30,6 @@ export const useReleases = ({
   setTag,
   tag,
 }: UseReleasesParams) => {
-  const [selected, setSelected] = useState<IReleases | null>(null);
-
   const [state, setState] = useState<ReleasesState>({
     releases: [],
     page: 1,
@@ -40,6 +38,23 @@ export const useReleases = ({
   });
 
   const listRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Compute selected release:
+   * - If tag exists, try to find full release object in loaded releases
+   * - If not found, create virtual release with tag as name
+   * - If no tag, selected is null
+   */
+  const selected = useMemo<IReleases | null>(() => {
+    if (tag == null) return null;
+
+    // Try to find full release object from API
+    const found = state.releases.find((release) => release.tag === tag);
+    if (found != null) return found;
+
+    // Create virtual release — use tag as name until real data loads
+    return { tag, name: tag } as IReleases;
+  }, [tag, state.releases]);
 
   const loadNextPage = useCallback(() => {
     setState((current) => {
@@ -61,65 +76,42 @@ export const useReleases = ({
   }, [owner, repo]);
 
   /**
-   * If tag comes from URL, create a virtual release object immediately.
-   * No need to load pages from API just to find the tag.
-   */
-  useEffect(() => {
-    if (tag != null) {
-      // Create a minimal release object with just the tag
-      setSelected({ tag } as IReleases);
-    } else {
-      setSelected(null);
-    }
-  }, [tag]);
-
-  /**
    * Fetch data from the API
    */
   useEffect(() => {
-    if (repo == null || owner == null || !state.isLoading) return;
+    if (open) {
+      if (repo == null || owner == null || !state.isLoading) return;
 
-    let ignore = false;
+      let ignore = false;
 
-    getReleases({ repo, owner, page: state.page })
-      .then(({ releases: batch, hasMore }) => {
-        if (ignore) return;
+      getReleases({ repo, owner, page: state.page })
+        .then(({ releases: batch, hasMore }) => {
+          if (ignore) return;
 
-        setState((current) => ({
-          releases: state.page === 1 ? batch : [...current.releases, ...batch],
-          page: current.page,
-          hasMore,
-          isLoading: false,
-        }));
-      })
-      .catch(() => {
-        if (ignore) return;
+          setState((current) => ({
+            releases:
+              state.page === 1 ? batch : [...current.releases, ...batch],
+            page: current.page,
+            hasMore,
+            isLoading: false,
+          }));
+        })
+        .catch(() => {
+          if (ignore) return;
 
-        setState((current) => ({
-          ...current,
-          releases: state.page === 1 ? [] : current.releases,
-          hasMore: false,
-          isLoading: false,
-        }));
-      });
+          setState((current) => ({
+            ...current,
+            releases: state.page === 1 ? [] : current.releases,
+            hasMore: false,
+            isLoading: false,
+          }));
+        });
 
-    return () => {
-      ignore = true;
-    };
-  }, [owner, repo, state.isLoading, state.page]);
-
-  /**
-   * When releases are loaded, try to find the full release object for the selected tag.
-   * This enriches the virtual release with complete data (date, description, etc.)
-   */
-  useEffect(() => {
-    if (tag == null || state.isLoading) return;
-
-    const found = state.releases.find((release) => release.tag === tag);
-    if (found) {
-      setSelected(found);
+      return () => {
+        ignore = true;
+      };
     }
-  }, [tag, state.releases, state.isLoading]);
+  }, [owner, repo, state.isLoading, state.page, open]);
 
   const loadMore = useCallback(
     (list: HTMLDivElement) => {
@@ -152,7 +144,6 @@ export const useReleases = ({
 
   const selectRelease = useCallback(
     (release: IReleases) => {
-      setSelected(release);
       setTag(release.tag);
       setOpen(false);
     },
