@@ -139,7 +139,7 @@ sequenceDiagram
 | Font          | IBM Plex Sans (variable)                                               |
 | Code quality  | ESLint (@antfu/eslint-config), Prettier, `tsc --noEmit`                |
 | Tests         | [Vitest](https://vitest.dev/) 4 + Testing Library                      |
-| Deployment    | [Vercel](https://vercel.com/) (via GitLab CI)                          |
+| Deployment    | [Cloudflare Pages](https://pages.cloudflare.com/) (via GitLab CI)       |
 
 
 ---
@@ -257,6 +257,21 @@ npm run preview  # Serve production build locally
 
 Set `VITE_API_URL` to the production backend URL at build time — Vite inlines env variables during the build.
 
+### Cloudflare Pages
+
+Create the Pages project once:
+
+```bash
+npx wrangler pages project create fastdoc-frontend --production-branch=main
+```
+
+Deploy commands:
+
+```bash
+npm run deploy:staging     # uploads dist/ as the develop preview branch
+npm run deploy:production  # uploads dist/ as the main production branch
+```
+
 ---
 
 ## Code Quality
@@ -299,11 +314,17 @@ Shared helpers live in [`tests/helpers/testHelper.ts`](tests/helpers/testHelper.
 2. **format** — `format`, `lint`, `type-check`
 3. **test** — `npm run test`
 4. **build** — artifact `dist/`
-5. **deploy** — Vercel deployment
-  - Preview deploy on non-`main` branches
+5. **deploy** — Cloudflare Pages deployment
+  - Staging preview deploy on `develop`
   - Production deploy on `main`
 
-Required CI variable: `VERCEL_TOKEN`.
+Required CI variables:
+
+| Variable                | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `VITE_API_URL`          | Public backend API URL, for example `https://.../api` |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID used by Wrangler                |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token with Pages edit/deploy access    |
 
 ---
 
