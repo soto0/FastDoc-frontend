@@ -14,8 +14,8 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "deploy": "npm run deploy:production",
-        "deploy:staging": "wrangler pages deploy dist --project-name=fastdoc-frontend --branch=develop",
-        "deploy:production": "wrangler pages deploy dist --project-name=fastdoc-frontend --branch=main"
+        "deploy:staging": "wrangler pages deploy dist --project-name=fastdoc --branch=develop",
+        "deploy:production": "wrangler pages deploy dist --project-name=fastdoc --branch=main"
     },
     "dependencies": {
         "@fontsource-variable/ibm-plex-sans": "^5.2.8",
