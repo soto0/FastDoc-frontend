@@ -1,6 +1,6 @@
 # FastDoc
 
-**FastDoc** is a full-stack application for exploring GitHub release notes. Pick a repository, choose a release tag, and get a clean, structured changelog in Markdown — formatted by an LLM (Groq) on the backend from the raw GitHub Release body.
+**FastDoc** is a full-stack application for exploring GitHub release notes. Pick a repository, choose a release tag, and get a clean, structured changelog in Markdown — formatted by the backend AI service from the raw GitHub Release body.
 
 No more digging through long release pages: search for a project like `next.js`, select a version, and read a concise summary in seconds.
 
@@ -241,7 +241,7 @@ The frontend expects a running backend instance. See the [backend README](../bac
 cd ../backend
 npm ci
 cp .env.example .env
-# Fill in GROQ_API_KEY and optionally GITHUB_TOKEN
+# Fill in OPENAI_API_KEY and optionally GITHUB_TOKEN
 
 npm run dev
 ```
@@ -310,21 +310,30 @@ Shared helpers live in [`tests/helpers/testHelper.ts`](tests/helpers/testHelper.
 
 **GitLab CI** (`.gitlab-ci.yml`) runs on `main`/`develop` branches and their merge requests:
 
-1. **install** — `npm ci`
-2. **format** — `format`, `lint`, `type-check`
+**GitHub Actions** (`.github/workflows/ci.yml`) runs on `main`/`develop` pushes and pull requests:
+
+1. **install** — `npm ci --ignore-scripts`
+2. **format** — `format:check`, ESLint, `type-check`
 3. **test** — `npm run test`
-4. **build** — artifact `dist/`
+4. **build** — `npm run build`
 5. **deploy** — Cloudflare Pages deployment
   - Staging preview deploy on `develop`
   - Production deploy on `main`
 
-Required CI variables:
+Required GitHub Actions secrets:
 
-| Variable                | Purpose                                               |
-| ----------------------- | ----------------------------------------------------- |
-| `VITE_API_URL`          | Public backend API URL, for example `https://.../api` |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID used by Wrangler                |
-| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token with Pages edit/deploy access    |
+| Secret                    | Purpose                                               |
+| ------------------------- | ----------------------------------------------------- |
+| `VITE_API_URL_STAGING`    | Staging backend API URL, for example `https://.../api` |
+| `VITE_API_URL_PRODUCTION` | Production backend API URL, for example `https://.../api` |
+| `CLOUDFLARE_ACCOUNT_ID`   | Cloudflare account ID used by Wrangler                |
+| `CLOUDFLARE_API_TOKEN`    | Cloudflare API token with Pages edit/deploy access    |
+
+Optional GitHub Actions variable:
+
+| Variable       | Purpose                                      |
+| -------------- | -------------------------------------------- |
+| `VITE_API_URL` | Backend API URL used by non-deploy CI builds |
 
 ---
 
@@ -332,7 +341,7 @@ Required CI variables:
 
 - **Backend dependency** — the UI cannot function without a running FastDoc backend; there is no mock or fallback mode.
 - **No client-side routing** — single page with URL query params only; no React Router.
-- **10 s request timeout** — Axios `apiClient` times out after 10 seconds; long Groq formatting calls may fail on slow responses.
+- **10 s request timeout** — Axios `apiClient` times out after 10 seconds; long AI formatting calls may fail on slow responses.
 - **Read-only package field** — the repository name input opens a search dialog rather than accepting free text, so only GitHub search results can be selected.
 - **Russian UI copy** — labels, placeholders, and empty states are in Russian; the README and code comments mix English and Russian.
 
@@ -344,7 +353,7 @@ Required CI variables:
 | Repository               | Role                                                             |
 | ------------------------ | ---------------------------------------------------------------- |
 | **frontend** (this repo) | React + Vite UI: repo search, release picker, Markdown rendering |
-| **backend**              | Hono API: GitHub proxy + Groq changelog formatting               |
+| **backend**              | Hono API: GitHub proxy + OpenAI changelog formatting             |
 
 
 The frontend communicates with the backend via `VITE_API_URL`. Shareable links encode the selected repository and release tag in the URL query string (`?owner=...&repo=...&tag=...`).
